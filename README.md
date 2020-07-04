@@ -9,7 +9,7 @@ Glyph-based data visualization.
 Citation for the corresponding paper: 
 
 [*High-Quality Rendering of
-Glyphs Using Hardware-AcceleratedRay Tracing*, Stefan Zellmann, Martin
+Glyphs Using Hardware-Accelerated Ray Tracing*, Stefan Zellmann, Martin
 Aumueller, Nathan Marshak, and Ingo Wald, _Proceedings of Eurographics
 Parallel Graphics and Visualization (Short Papers)_, 2020.](https://www.researchgate.net/publication/340793638_High-Quality_Rendering_of_Glyphs_Using_Hardware-Accelerated_Ray_Tracing)
 
