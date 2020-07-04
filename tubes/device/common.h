@@ -18,7 +18,7 @@
 
 #include "owl/common/math/box.h"
 #include "owl/common/math/random.h"
-#include "owl/ll/llowl.h"
+#include "owl/owl.h"
 
 namespace tubes {
   using namespace owl;

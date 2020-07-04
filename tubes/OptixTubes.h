@@ -34,7 +34,8 @@ namespace tubes {
         virtual buildModel(), and then set up the SBT, raygen, etc */
     void setModel(Tubes::SP tubes);
 
-    void resizeFrameBuffer(const vec2i &newSize);
+    void resizeFrameBuffer(const vec2i &newSize,
+                           void *colorBufferPointer);
     void updateFrameState(device::FrameState &fs);
 
     uint32_t *mapColorBuffer();

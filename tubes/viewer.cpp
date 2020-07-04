@@ -22,15 +22,14 @@
 #include <cuda_gl_interop.h>
 // eventually to go into 'apps/'
 #define STB_IMAGE_WRITE_IMPLEMENTATION 1
-#include "owl/common/3rdParty/stb/stb_image_write.h"
+#include "samples/common/3rdParty/stb/stb_image_write.h"
 #define STB_IMAGE_IMPLEMENTATION 1
-#include "owl/common/3rdParty/stb/stb_image.h"
+#include "samples/common/3rdParty/stb/stb_image.h"
 
 #include <math.h>
 #include <cuda_runtime_api.h>
 #include <cuda_gl_interop.h>
-#include "owl/common/viewerWidget/ViewerWidget.h"
-#include <GL/glut.h>
+#include "samples/common/owlViewer/OWLViewer.h"
 // std
 #include <queue>
 #include <map>
@@ -39,6 +38,7 @@
 #include <thread>
 #include <condition_variable>
 
+using namespace owl::common;
 
 namespace tubes {
   
@@ -67,34 +67,18 @@ namespace tubes {
     exit(msg != "");
   }
 
-  struct TubesViewer : public owl::viewer::ViewerWidget
+  struct TubesViewer : public owl::viewer::OWLViewer
   {
-    typedef ViewerWidget inherited;
+    typedef owl::viewer::OWLViewer inherited;
 
-    OWLTubes &renderer;
-    
-    TubesViewer(owl::viewer::GlutWindow::SP window,
-                OWLTubes &renderer)
-      : ViewerWidget(window),
+    TubesViewer(OWLTubes &renderer)
+      : owl::viewer::OWLViewer("owlTubesViewer",cmdline.windowSize),
         renderer(renderer)
     {}
     
     void screenShot()
     {
-      const uint32_t *fb
-        = (const uint32_t *)owlBufferGetPointer(renderer.colorBuffer,0);
-      const vec2i fbSize = renderer.fbSize;
-
-      const std::string fileName = cmdline.method+"_"+screenShotFileName;
-      std::vector<uint32_t> pixels;
-      for (int y=0;y<fbSize.y;y++) {
-        const uint32_t *line = fb + (fbSize.y-1-y)*fbSize.x;
-        for (int x=0;x<fbSize.x;x++) {
-          pixels.push_back(line[x] | (0xff << 24));
-        }
-      }
-      stbi_write_png(fileName.c_str(),fbSize.x,fbSize.y,4,
-                     pixels.data(),fbSize.x*sizeof(uint32_t));
+      inherited::screenShot(screenShotFileName);
       std::cout << "screenshot saved in '" << fileName << "'" << std::endl;
     }
     
@@ -114,17 +98,17 @@ namespace tubes {
       frameState.camera_lens_dv = camera.lens.dv;
       frameState.accumID = 0;
       renderer.updateFrameState(frameState);
-      glutPostRedisplay();
     }
     
     /*! window notifies us that we got resized */
     virtual void resize(const vec2i &newSize) override
     {
       this->fbSize = newSize;
-      renderer.resizeFrameBuffer(newSize);
-      
       // ... tell parent to resize (also resizes the pbo in the window)
       inherited::resize(newSize);
+      
+      renderer.resizeFrameBuffer(newSize,fbPointer);
+      
       
       // ... and finally: update the camera's aspect
       setAspect(newSize.x/float(newSize.y));
@@ -139,17 +123,12 @@ namespace tubes {
     virtual void render() override
     {
       if (fbSize.x < 0) return;
-      uint32_t *fb = renderer.mapColorBuffer();
-      if (!fb) return;
       
       static double t_last = -1;
       renderer.render();
-      window->drawPixels(fb);
-      renderer.unmapColorBuffer();
-      window->swapBuffers();
       
       double t_now = getCurrentTime();
-      static double avg_t = 0.;
+      static double avg_t = 0.;etti
       if (t_last >= 0)
         avg_t = 0.8*avg_t + 0.2*(t_now-t_last);
 
@@ -234,19 +213,21 @@ namespace tubes {
         renderer.updateFrameState(frameState);
         break;
       default:
-        ViewerWidget::key(key,where);
+        inherited::key(key,where);
       }
     }
 
     vec2i fbSize { -1,-1 };
     device::FrameState frameState;
     bool displayFPS = true;//false;
+
+    /*! the actual rnederer code (ie, everything that's got nothing to
+        do with windows or UI */
+    OWLTubes &renderer;
   };
   
   extern "C" int main(int argc, char **argv)
   {
-    owl::viewer::GlutWindow::initGlut(argc,argv);
-    
     std::string sceneFileName = "hair.obj";
     //std::string sceneFileName = "procedural://5000:4.0,12.0:0.2,0.0";
     
@@ -305,16 +286,9 @@ namespace tubes {
     
     owlTubes->setModel(tubes);
     
-    owl::viewer::GlutWindow::SP window
-      = owl::viewer::GlutWindow::prepare(vec2i(800,800),
-                                         owl::viewer::GlutWindow::UINT8_RGBA,
-                                         "owlTubesViewer");
-    TubesViewer widget(window, *owlTubes);
+    TubesViewer widget(*owlTubes);
     widget.frameState.samplesPerPixel = cmdline.spp;
     widget.frameState.shadeMode = cmdline.shadeMode;
-    if (cmdline.windowSize != vec2i(0)) {
-      glutReshapeWindow(cmdline.windowSize.x,cmdline.windowSize.y);//glutWindow->glutWindowHandle,
-    }
     box3f sceneBounds = tubes->getBounds();
     widget.enableInspectMode(/* valid range of poi*/sceneBounds,
                              /* min distance      */1e-3f,
@@ -335,6 +309,6 @@ namespace tubes {
                                   /*fovy(deg)*/70);
     }
     widget.setWorldScale(length(sceneBounds.span()));
-    owl::viewer::GlutWindow::run(widget);
+    widget.showAndRun();
   }
 } // ::tubes

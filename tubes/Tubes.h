@@ -23,6 +23,8 @@
 #include <memory>
 // owl
 #include <owl/owl.h>
+#include "owl/common/math/box.h"
+#include "owl/common/math/AffineSpace.h"
 
 namespace tubes {
 

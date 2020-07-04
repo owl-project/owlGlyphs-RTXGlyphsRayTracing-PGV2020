@@ -14,14 +14,16 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-#find_package(OpenGL REQUIRED)
-include(configure_glut)
+add_definitions(${OWL_CXX_FLAGS})
+
+include_directories(${OWL_INCLUDES})
+include_directories(${OWL_VIEWER_INCLUDES})
 
 #cuda_compile_and_embed(embedded_tubes_programs device/tubes.cu)
 cuda_compile_and_embed(embedded_common_programs device/common.cu)
 cuda_compile_and_embed(embedded_InstanceTubes_programs device/InstanceTubes.cu)
 
-include_directories(${GLUT_INCLUDE_DIR})
+message("OWL_INCLUDES ${OWL_INCLUDES}")
 add_executable(owlTubesViewer
   ${embedded_common_programs}
   ${embedded_InstanceTubes_programs}
@@ -35,7 +37,6 @@ add_executable(owlTubesViewer
   InstanceTubes.cpp
   )
 target_link_libraries(owlTubesViewer
-  owl_viewerWidget_static
   ${OWL_LIBRARIES}
-  tbb
+  ${OWL_VIEWER_LIBRARIES}
   )

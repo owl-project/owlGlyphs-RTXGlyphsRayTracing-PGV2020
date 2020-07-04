@@ -31,12 +31,6 @@ endif()
 set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/submodules/owl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${owl_dir}/owl/common/cmake/")
 
-add_subdirectory(${owl_dir} EXCLUDE_FROM_ALL)
-#include(configure_owl)
-#include(configure_cuda)
-include(configure_optix)
-#include(configure_build_type)
-
 # -------------------------------------------------------
 if (NOT WIN32) 
 set(CMAKE_CXX_FLAGS "-std=c++11")
@@ -46,16 +40,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # -------------------------------------------------------
-include_directories("${OWL_INCLUDES}")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-add_subdirectory(${owl_dir}
-  external_owl
-  EXCLUDE_FROM_ALL)
-add_subdirectory(${owl_dir}/owl/common/viewerWidget
-  external_owl_viewerWidget
-  EXCLUDE_FROM_ALL)
+add_subdirectory(${owl_dir} EXCLUDE_FROM_ALL)
+#include(configure_optix)
 
-# -------------------------------------------------------
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(tubes)
-add_subdirectory(tools)
+
 

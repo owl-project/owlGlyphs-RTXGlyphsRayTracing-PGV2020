@@ -52,7 +52,7 @@ namespace tubes {
     OWLVarDecl rayGenVars[] = {
       { "deviceIndex",     OWL_DEVICE, OWL_OFFSETOF(RayGenData,deviceIndex)},
       { "deviceCount",     OWL_INT,    OWL_OFFSETOF(RayGenData,deviceCount)},
-      { "colorBuffer",     OWL_BUFPTR, OWL_OFFSETOF(RayGenData,colorBufferPtr)},
+      { "colorBuffer",     OWL_RAW_POINTER, OWL_OFFSETOF(RayGenData,colorBufferPtr)},
       { "accumBuffer",     OWL_BUFPTR, OWL_OFFSETOF(RayGenData,accumBufferPtr)},
       { "arrowBuffer",     OWL_BUFPTR, OWL_OFFSETOF(RayGenData,arrowBuffer)},
       { "frameStateBuffer",OWL_BUFPTR, OWL_OFFSETOF(RayGenData,frameStateBuffer)},
@@ -132,7 +132,8 @@ namespace tubes {
     owlRayGenLaunch2D(rayGen,fbSize.x,fbSize.y);
   }
 
-  void OWLTubes::resizeFrameBuffer(const vec2i &newSize)
+  void OWLTubes::resizeFrameBuffer(const vec2i &newSize,
+                                   void *colorBufferPointer)
   {
     fbSize = newSize;
     if (!accumBuffer)
@@ -141,10 +142,9 @@ namespace tubes {
     owlRayGenSetBuffer(rayGen,"accumBuffer",accumBuffer);
     owlRayGenSet1i(rayGen,"deviceCount",owlGetDeviceCount(context));
       
-    if (!colorBuffer)
-      colorBuffer = owlHostPinnedBufferCreate(context,OWL_INT,fbSize.x*fbSize.y);
     owlBufferResize(colorBuffer,fbSize.x*fbSize.y);
-    owlRayGenSetBuffer(rayGen,"colorBuffer",colorBuffer);
+    owlRayGenSetPointer(rayGen,"colorBuffer",colorBufferPointer);
+    // owlRayGenSetBuffer(rayGen,"colorBuffer",colorBuffer);
     owlRayGenSet2i(rayGen,"fbSize",fbSize.x,fbSize.y);
   }
   
