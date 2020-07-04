@@ -375,6 +375,9 @@ namespace glyphs {
         usage("unknown cmdline arg '"+arg+"'");
     }
 
+    if (fileNames.empty())
+      usage("No glyph file name provided. See testdata.glyphs in project root directory.");
+
     // ------------------------------------------------------------------
     // load input data
     // ------------------------------------------------------------------
