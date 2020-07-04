@@ -21,10 +21,10 @@
 #include <cuda_runtime_api.h>
 #include <cuda_gl_interop.h>
 // eventually to go into 'apps/'
-#define STB_IMAGE_WRITE_IMPLEMENTATION 1
-#include "samples/common/3rdParty/stb/stb_image_write.h"
-#define STB_IMAGE_IMPLEMENTATION 1
-#include "samples/common/3rdParty/stb/stb_image.h"
+// #define STB_IMAGE_WRITE_IMPLEMENTATION 1
+// #include "samples/common/3rdParty/stb/stb_image_write.h"
+// #define STB_IMAGE_IMPLEMENTATION 1
+// #include "samples/common/3rdParty/stb/stb_image.h"
 
 #include <math.h>
 #include <cuda_runtime_api.h>
@@ -79,7 +79,7 @@ namespace tubes {
     void screenShot()
     {
       inherited::screenShot(screenShotFileName);
-      std::cout << "screenshot saved in '" << fileName << "'" << std::endl;
+      std::cout << "screenshot saved in '" << screenShotFileName << "'" << std::endl;
     }
     
     // /*! this function gets called whenever the viewer widget changes camera settings */
@@ -128,7 +128,7 @@ namespace tubes {
       renderer.render();
       
       double t_now = getCurrentTime();
-      static double avg_t = 0.;etti
+      static double avg_t = 0.;
       if (t_last >= 0)
         avg_t = 0.8*avg_t + 0.2*(t_now-t_last);
 
@@ -136,7 +136,7 @@ namespace tubes {
         //        std::cout << "fps : " << (1.f/avg_t) << std::endl;
         char title[1000];
         sprintf(title,"owlTubes - %.2f FPS",(1.f/avg_t));
-        window->setTitle(title);
+        inherited::setTitle(title);
       }
       t_last = t_now;
       
@@ -179,7 +179,7 @@ namespace tubes {
         displayFPS = !displayFPS;
         break;
       case 'C': {
-        auto &fc = fullCamera;
+        auto &fc = getCamera();//fullCamera;
         std::cout << "(C)urrent camera:" << std::endl;
         std::cout << "- from :" << fc.position << std::endl;
         std::cout << "- poi  :" << fc.getPOI() << std::endl;

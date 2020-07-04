@@ -68,7 +68,6 @@ namespace tubes {
                         rayGenVars,-1);
 
     owlRayGenSetBuffer(rayGen,"frameStateBuffer",frameStateBuffer);    
-    resizeFrameBuffer(vec2i(100));
   }
 
 
