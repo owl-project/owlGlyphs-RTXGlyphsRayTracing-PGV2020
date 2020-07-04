@@ -28,7 +28,7 @@ set (CMAKE_CXX_FLAGS "--std=c++11")
 set (CUDA_PROPAGATE_HOST_FLAGS ON)
 endif()
 
-set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/../owl)
+set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/submodules/owl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${owl_dir}/owl/common/cmake/")
 
 include(configure_owl)
