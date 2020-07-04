@@ -14,17 +14,15 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "tubes/device/TubesGeom.h"
-#include "tubes/device/PerRayData.h"
-#include "tubes/device/RayGenData.h"
-#include "tubes/device/Camera.h"
+#include "glyphs/device/GlyphsGeom.h"
+#include "glyphs/device/PerRayData.h"
+#include "glyphs/device/RayGenData.h"
+#include "glyphs/device/Camera.h"
+#include "glyphs/device/disney_bsdf.h"
+#include "glyphs/device/TriangleMesh.h"
 
-#include <optix_device.h> // Only for test, can be remove later. 
-
-namespace tubes {
+namespace glyphs {
   namespace device {
-    
-
 
     inline __device__
     int32_t make_8bit(const float f)
@@ -44,36 +42,17 @@ namespace tubes {
     inline __device__ vec3f random_in_unit_sphere(Random &rnd) {
       vec3f p;
       do {
-        p = 2.0f*vec3f(rnd(),rnd(),rnd()) - vec3f(1, 1, 1);
+        p = 2.0f*vec3f(rnd(),rnd(),rnd()) - vec3f(1.f, 1.f, 1.f);
       } while (dot(p,p) >= 1.0f);
       return p;
     }
     
     // ------------------------------------------------------------------
-    // actual tubes stuff
+    // A simple path tracer; if pathDepth <= 1 falls back to local
+    // shading.
+    // Enable FAST_SHADING via cmake option to get Lambertian
+    // instead of Disney BRDF
     // ------------------------------------------------------------------
-
-    /*
-      OPTIX_INTERSECT_PROGRAM(tubes_intersect)()
-      {
-      const int primID = optixGetPrimitiveIndex();
-      const auto &self
-      = owl::getProgramData<TubesGeom>();
-      
-      owl::Ray ray(optixGetWorldRayOrigin(),
-      optixGetWorldRayDirection(),
-      optixGetRayTmin(),
-      optixGetRayTmax());
-
-      const Link link = self.links[primID];
-      float tmp_hit_t = ray.tmax;
-      if (intersectSphere(link,self.radius,ray,tmp_hit_t)) {
-      optixReportIntersection(tmp_hit_t,primID);
-      }
-      }
-    */
-    
-
 
     inline __device__
     vec3f missColor(const Ray &ray)
@@ -84,96 +63,115 @@ namespace tubes {
       return c;
     }
 
-    
-    
-    inline __device__ vec3f traceRay(const RayGenData &self,
-                                     owl::Ray &ray,
-                                     Random &rnd,
-                                     PerRayData &prd)
+    inline __device__
+    vec3f pathTrace(const RayGenData &self,
+                    owl::Ray &ray,
+                    Random &rnd,
+                    PerRayData &prd)
     {
       vec3f attenuation = 1.f;
       vec3f ambientLight(.8f);
 
       const FrameState *fs = &self.frameStateBuffer[0];
-      int pathDepth = fs->shadeMode;
-      /* code for tubes */
+      int pathDepth = fs->pathDepth;
+      
       if (pathDepth <= 1) {
-        prd.instID = -1;
-        // prd.numIsecs = 0;
+        prd.primID = -1;
         owl::traceRay(/*accel to trace against*/self.world,
                       /*the ray to trace*/ ray,
-                      /*prd*/prd);
+                      /*prd*/prd/*,
+                              OPTIX_RAY_FLAG_DISABLE_ANYHIT*/);
 
-        // if (owl::getLaunchIndex()*2 == owl::getLaunchDims())
-        //   printf("isecs %i\n",prd.numIsecs);
-        if (prd.instID < 0)
+        if (prd.primID < 0)
           return missColor(ray);
-
-        const Arrow arrow = self.arrowBuffer[prd.instID];
-
-        vec3f N = prd.gn;
-
+        
+        vec3f N = prd.Ng;
         if (dot(N,(vec3f)ray.direction)  > 0.f)
           N = -N;
         N = normalize(N);
-
-        // hardcoded albedo for now:
-        const vec3f albedo// = vec3f(0.628, 0.85, 0.511);
-        = randomColor(1+prd.instID);
+        
+        vec3f albedo;
+        
+        // Random colors for glyphs, grey for triangles
+        if (prd.meshID == 0) {
+          albedo = vec3f(.8f);
+        } else {
+          unsigned rgba = self.linkBuffer[prd.primID].col; // ignore alpha for now
+          albedo = vec3f((rgba & 0xff) / 255.f,
+                        ((rgba >> 8) & 0xff) / 255.f,
+                        ((rgba >> 16) & 0xff) / 255.f);
+        }
         vec3f color = albedo * (.2f+.6f*fabsf(dot(N,(vec3f)ray.direction)));
         return color;
       }
 
-
-      
+      // could actually swtich material based on meshID ...
+      DisneyMaterial material = fs->material;
       /* iterative version of recursion, up to depth 50 */
       for (int depth=0;true;depth++) {
-        prd.instID = -1;
-        owl::trace(/*accel to trace against*/self.world,
-                   /*the ray to trace*/ ray,
-                   /*numRayTypes*/1,
-                   /*prd*/prd,
-                   0);
-        // rtTrace(world, ray, prd, RT_VISIBILITY_ALL, RT_RAY_FLAG_DISABLE_ANYHIT);
+        prd.primID = -1;
+        owl::traceRay(/*accel to trace against*/self.world,
+                      /*the ray to trace*/ ray,
+                      /*prd*/prd/*,
+                      OPTIX_RAY_FLAG_DISABLE_ANYHIT*/);
         
-        if (prd.instID == -1) {
+        if (prd.primID == -1) {
           // miss...
           if (depth == 0)
             return missColor(ray);
+
+#if FAST_SHADING
           return attenuation * ambientLight;
+#else
+          float phi = atan2(ray.direction.y, ray.direction.x);
+          float theta = acos(ray.direction.z / length(ray.direction));
+          const float half_width = 0.1f;
+
+          if (theta > (0.55f - half_width) * M_PIF && theta < (0.55f + half_width) * M_PIF
+              && phi > (0.75f - half_width) * M_PIF && phi < (0.75f + half_width) * M_PIF) {
+            return attenuation * owl::vec3f(8.f);
+          } else {
+            return attenuation * owl::vec3f(ambientLight / 2.f);
+          }
+#endif
+        }
+
+        vec3f N = normalize(prd.Ng);
+        const vec3f w_o = -ray.direction;
+        if (dot(N, w_o) < 0.f) {
+          N = -N;
         }
         
-        const Arrow arrow = self.arrowBuffer[prd.instID];
-        vec3f N = prd.gn;
-        // Normal of the cylinder. No more on-the-fly calculation needed.        
-        // printf("normal %f %f %f\n",N.x,N.y,N.z);
-
-        //if (dot(N,(vec3f)ray.direction)  > 0.f)
-        //  N = -N;
-        
-        N = normalize(N);
-
-        // hardcoded albedo for now:
-        const vec3f albedo = vec3f(.6f);
-        // = randomColor(1+prd.instID);//link.matID);
-        // hard-coded for the 'no path tracing' case:
-        // if (pathDepth <= 1)
-        //   return albedo * (.2f+.6f*fabsf(dot(N,(vec3f)ray.direction)));
-          
-        attenuation *= albedo;
-        //attenuation *=  (.2f + .6f * fabsf(dot(N, (vec3f)ray.direction)));
-
-        if (depth >= pathDepth) {
-          // ambient term:
-          return attenuation * ambientLight;
+        // Random colors for glyphs, grey for triangles
+        if (prd.meshID >= 0) { 
+          material.base_color = vec3f(.8f);
+        } else {
+          unsigned rgba = self.linkBuffer[prd.primID].col; // ignore alpha for now
+          material.base_color = vec3f((rgba & 0xff) / 255.f,
+                                      ((rgba >> 8) & 0xff) / 255.f,
+                                      ((rgba >> 16) & 0xff) / 255.f);
         }
+
+        owl::vec3f v_x, v_y;
+        ortho_basis(v_x, v_y, N);
+        // pdf and dir are set by sampling the BRDF
+        float pdf;
+        vec3f scattered_direction;
+        vec3f albedo = sample_disney_brdf(material, N, w_o, v_x, v_y, rnd,
+                                          scattered_direction, pdf);
         
         const vec3f scattered_origin    = ray.origin + prd.t * ray.direction;
-        const vec3f scattered_direction = N + random_in_unit_sphere(rnd);
         ray = owl::Ray(/* origin   : */ scattered_origin,
-                       /* direction: */ normalize(scattered_direction),
+                       /* direction: */ scattered_direction,
                        /* tmin     : */ 1e-3f,
                        /* tmax     : */ 1e+8f);
+
+        if (depth >= pathDepth || pdf == 0.f || albedo == owl::vec3f(0.f)) {
+          // ambient term:
+          return owl::vec3f(0.f);//attenuation * ambientLight;
+        }
+
+        attenuation *= albedo * fabs(dot(scattered_direction, N)) / pdf;
       }
     }
 
@@ -208,13 +206,14 @@ namespace tubes {
                  );
 
       PerRayData prd;
+      prd.rnd = &rnd;
 
       for (int s = 0; s < fs->samplesPerPixel; s++) {
         vec2f pixelSample = vec2f(pixelID) + vec2f(rnd(),rnd());
         float u = float(pixelID.x + rnd());
         float v = float(pixelID.y + rnd());
         owl::Ray ray = Camera::generateRay(*fs, pixelSample, rnd);
-        col += vec4f(traceRay(self,ray,rnd,prd),1);
+        col += vec4f(pathTrace(self,ray,rnd,prd),1);
       }
       col = col / float(fs->samplesPerPixel);
 
@@ -238,7 +237,7 @@ namespace tubes {
       uint32_t rgba = make_rgba8(col / (fs->accumID+1.f));
       self.colorBufferPtr[pixelIdx] = rgba;
     }
-    
+ 
   }
 }
 

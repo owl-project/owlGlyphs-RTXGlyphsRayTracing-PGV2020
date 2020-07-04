@@ -15,7 +15,7 @@
 # ======================================================================== #
 
 cmake_policy(SET CMP0048 NEW)
-project(owlTubes VERSION 0.1.0)
+project(owlGlyphs VERSION 0.1.0)
 
 cmake_minimum_required(VERSION 2.8)
 # iw, 1/3/20: yes, i know this is 'old' cmake style, but on CentOS7
@@ -28,8 +28,30 @@ set (CMAKE_CXX_FLAGS "--std=c++11")
 set (CUDA_PROPAGATE_HOST_FLAGS ON)
 endif()
 
-set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/submodules/owl)
+option(FAST_SHADING "Use only fast/cheap shading options (lambertian, etc.)" OFF)
+if (FAST_SHADING)
+  add_definitions(-DFAST_SHADING=1)
+endif()
+
+option(TESSELLATE_SUPER_GLYPHS "Tessellate glyphs for comparison." OFF)
+if (TESSELLATE_SUPER_GLYPHS)
+  add_definitions(-DTESSELLATE_SUPER_GLYPHS=1)
+endif()
+
+option(USER_GEOM_SUPER_GLYPHS "User geom glyphs for comparison." OFF)
+if (USER_GEOM_SUPER_GLYPHS)
+  add_definitions(-DUSER_GEOM_SUPER_GLYPHS=1)
+endif()
+
+set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/external/owl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${owl_dir}/owl/common/cmake/")
+add_subdirectory(${owl_dir} external_owl EXCLUDE_FROM_ALL)
+
+include(configure_cuda)
+
+include_directories(${OWL_INCLUDES})
+include_directories(${OWL_VIEWER_INCLUDES})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # -------------------------------------------------------
 if (NOT WIN32) 
@@ -40,10 +62,5 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # -------------------------------------------------------
-add_subdirectory(${owl_dir} EXCLUDE_FROM_ALL)
-#include(configure_optix)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-add_subdirectory(tubes)
-
+add_subdirectory(glyphs)
 

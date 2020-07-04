@@ -16,18 +16,23 @@
 
 #pragma once
 
-#include "tubes/OptixTubes.h"
+#include "glyphs/OptixGlyphs.h"
 
-namespace tubes {
+namespace glyphs {
 
-  /*! tubes variant that uses exactly one instance trnasform per tube,
-     to align that tube with z axis
+  /*! Simple sphere glyphs;
+    Sphere glyphs are "affine glyphs", i.e. under transformation
+    they can become general ellipsoids and that behavior is desired
   */
-  struct InstanceTubes : public OWLTubes
+  struct SphereGlyphs : public OWLGlyphs
   {
-    InstanceTubes();
+    SphereGlyphs();
     
-    void buildModel(Tubes::SP model) override;
+    void build(Glyphs::SP glyphs,
+               Triangles::SP triangles) override;
+
+  private:
+    std::vector<std::pair<OWLGroup,affine3f>> buildGlyphs(Glyphs::SP glyphs);
   };
 }
 

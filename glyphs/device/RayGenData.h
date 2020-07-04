@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "tubes/device/FrameState.h"
-#include "tubes/device/TubesGeom.h"
+#include "glyphs/device/FrameState.h"
+#include "glyphs/device/GlyphsGeom.h"
 
-namespace tubes {
+namespace glyphs {
   namespace device {
 
     struct RayGenData {
@@ -28,8 +28,12 @@ namespace tubes {
       OptixTraversableHandle world;
       vec2ui      fbSize;
       uint32_t   *colorBufferPtr;
+#ifdef __CUDA_ARCH__
       float4     *accumBufferPtr;
-      Arrow       *arrowBuffer;
+#else
+      vec4f      *accumBufferPtr;
+#endif
+      Link       *linkBuffer;
       FrameState *frameStateBuffer;
     };
   

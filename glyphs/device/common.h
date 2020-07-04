@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2018-2019 Ingo Wald                                            //
+// Copyright 2018-2020 Ingo Wald                                            //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -16,39 +16,32 @@
 
 #pragma once
 
-#include "tubes/device/FrameState.h"
-#include "Tubes.h"
-#include "owl/owl.h"
+#include "owl/common/math/AffineSpace.h"
+#include "owl/common/math/random.h"
+#include <owl/owl.h>
 
-namespace tubes {
+namespace glyphs {
+  using namespace owl;
+  using namespace owl::common;
 
-  /*! the entire set of tubes, including all links - everything we
-    wnat to render */
-  struct OWLTubes {
-    OWLTubes();
-    /*! build owl-model (OWLGeoms, OWLGroup, etc) that we can ray
-        trace against */
-    virtual void buildModel(Tubes::SP tubes) = 0;
+  struct DisneyMaterial {
+      vec3f base_color = vec3f(0.8f);
+      float metallic = 0.f;
 
-    /*! this should only ever once get called... it'll call the
-        virtual buildModel(), and then set up the SBT, raygen, etc */
-    void setModel(Tubes::SP tubes);
+      float specular = 0.f;
+      float roughness = 1.0f;
+      float specular_tint = 0.f;
+      float anisotropy = 0.f;
 
-    void resizeFrameBuffer(const vec2i &newSize,
-                           void *colorBufferPointer);
-    void updateFrameState(device::FrameState &fs);
+      float sheen = 0.f;
+      float sheen_tint = 0.0f;
+      float clearcoat = 0.0f;
+      float clearcoat_gloss = 0.0f;
 
-    void render();
-
-    /*! size of current frame buffer */
-    vec2i fbSize { -1,-1 };
-    OWLContext context = 0;
-    OWLModule module = 0;
-    OWLBuffer frameStateBuffer = 0;
-    OWLBuffer accumBuffer = 0;
-    OWLGroup  world = 0;
-    OWLRayGen rayGen = 0;
-    OWLBuffer arrowBuffer = 0;
+      float ior = 1.45f;
+      float specular_transmission = 0.f;
   };
-  
+
+  namespace device {
+  }
 }

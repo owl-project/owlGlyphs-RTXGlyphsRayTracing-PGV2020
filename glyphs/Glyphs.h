@@ -16,20 +16,44 @@
 
 #pragma once
 
-#include "tubes/OptixTubes.h"
+#include "device/common.h"
+#include "device/GlyphsGeom.h"
+// std
+#include <vector>
+#include <memory>
+#include <string>
 
-namespace tubes {
-  /*! simple/default varaint in which each tube/link becomes a user
-      geometry with a world-space AABB
-  */
-  struct BasicTubes : public OWLTubes
-  {
-    BasicTubes();
-    
-    void buildModel(Tubes::SP model) override;
-  };
+namespace glyphs {
+
+  using device::Link;
   
+  /*! the entire set of glyphs, including all links - everything we
+    wnat to render */
+  struct Glyphs {
+    typedef device::Link Link;
+    typedef std::shared_ptr<Glyphs> SP;
+
+    /*! return number of links in this model */
+    inline size_t size() const { return links.size(); }
+    
+    /*! load a file */
+    static Glyphs::SP load(const std::string &fileName);
+
+    /*! load several files
+
+      @see load(const std::string&,float) for more info
+     */
+    static Glyphs::SP load(const std::vector<std::string> &fileNames);
+
+    static affine3f getXform(const Glyphs::SP& glyphs, const Link& l);
+
+    /*! returns world space bounding box of the scene; to be used for
+      the viewer to automatically set camera and motion speed */
+    box3f getBounds() const;
+  
+    std::vector<Link> links;
+    float             radius { 0.2f };
+
+    SP nextTimestep { nullptr };
+  };
 }
-
-
-

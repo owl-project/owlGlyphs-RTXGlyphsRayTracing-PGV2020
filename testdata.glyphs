@@ -1,0 +1,17 @@
+# Simple glyphs test data ascii file format
+# Single line comments (like this one) are allowed
+# Blank lines are allowed
+
+# Each glyph goes on one line; the following formats are allowable
+
+# 1.) two positions (note that this simple program sets the radius of all glyphs to 0.2)
+# pos1 pos2
+(1.0,0,0) (1.6,0.8,1)
+
+# 2.) +color; _some_ glyph types honor this; colors are RGB [0..1]
+# pos1 pos2 col
+(0,0,0.6) (1.5,0,0.6) (0.9,0.3,0.1)
+
+# 3.) +acceleration; motion blur glyphs will honor this
+# pos1 pos2 col accel
+(0,1.3,1) (3,1.3,1) (0.0,0.0,0.8) (100000,0,0)

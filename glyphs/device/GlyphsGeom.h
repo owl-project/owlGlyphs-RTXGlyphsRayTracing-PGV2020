@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2018-2019 Ingo Wald                                            //
+// Copyright 2018-2020 Ingo Wald                                            //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -16,22 +16,53 @@
 
 #pragma once
 
-#include "tubes/device/common.h"
+#include "glyphs/device/common.h"
 
-namespace tubes {
+namespace glyphs {
   namespace device {
+
+    struct Link {
+      vec3f pos;
+      
+      /*! per vertex color, 8-bit RGBA */
+      unsigned col = (unsigned)-1;
+      
+      /* current node radius*/
+      float rad;
+
+      /* acceleration of glyph */
+      vec3f accel = vec3f();
+
+      /*! previous node in the graph; either a valid index in the
+          geom's control point buffer, or '-1' to indicate 'no
+          predecessor' (ie, this is then the first control point in a
+          node/stream line */      
+      int   prev;
+    };
     
-    typedef owl::common::LCG<16> Random;
-    
-    struct PerRayData {
-      /* Instance ID */
-      int instID;
-      /*! distance to hit point */
-      float t;
-      /*! geometric normal */
-      vec3f gn;
+    /*! the device-side glyphs geometry */
+    struct GlyphsGeom {
+      /*! list of all control points (a buffer) */
+      Link         *links;
+      float         radius;
+      int           numLinks;
+    };
+
+    struct TrianglesGeomData
+    {
+        vec3f*  color;
+        vec3i* index;
+        vec3f* vertex;
+    };
+
+    struct SuperGeomData
+    {
+        vec3f* rst;
+        vec3f* ABC;
+        vec3f*  color;
+        vec3i* index;
+        vec3f* vertex;
     };
 
   }
 }
-

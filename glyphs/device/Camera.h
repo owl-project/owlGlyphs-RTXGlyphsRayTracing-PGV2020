@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "tubes/device/FrameState.h"
+#include "glyphs/device/FrameState.h"
 
-namespace tubes {
+namespace glyphs {
   namespace device {
     
     struct Camera {

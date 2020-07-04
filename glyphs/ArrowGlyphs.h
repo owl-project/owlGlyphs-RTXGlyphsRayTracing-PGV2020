@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2018-2020 Ingo Wald                                            //
+// Copyright 2018-2020 The Contributors                                     //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -16,14 +16,25 @@
 
 #pragma once
 
-#include "owl/common/math/box.h"
-#include "owl/common/math/random.h"
-#include "owl/owl.h"
+#include "glyphs/OptixGlyphs.h"
 
-namespace tubes {
-  using namespace owl;
-  using namespace owl::common;
-  
-  namespace device {
-  }
+namespace glyphs {
+
+  /*! Arrow glyph type;
+    This is an example of a non-affine glyph; i.e. the glyph
+    cannot just be transformed with the instance transform,
+    so the geometry is stored in extra buffers.
+  */
+  struct ArrowGlyphs : public OWLGlyphs
+  {
+    ArrowGlyphs();
+    
+    void build(Glyphs::SP glyphs,
+               Triangles::SP triangles) override;
+
+  private:
+    std::vector<std::pair<OWLGroup,affine3f>> buildGlyphs(Glyphs::SP glyphs);
+  };
 }
+
+

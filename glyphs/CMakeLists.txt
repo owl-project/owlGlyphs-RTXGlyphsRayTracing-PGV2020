@@ -14,28 +14,37 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-add_definitions(${OWL_CXX_FLAGS})
-
-include_directories(${OWL_INCLUDES})
-include_directories(${OWL_VIEWER_INCLUDES})
-
-#cuda_compile_and_embed(embedded_tubes_programs device/tubes.cu)
 cuda_compile_and_embed(embedded_common_programs device/common.cu)
-cuda_compile_and_embed(embedded_InstanceTubes_programs device/InstanceTubes.cu)
+cuda_compile_and_embed(embedded_ArrowGlyphs_programs device/ArrowGlyphs.cu)
+cuda_compile_and_embed(embedded_MotionSpheres_programs device/MotionSpheres.cu)
+cuda_compile_and_embed(embedded_SphereGlyphs_programs device/SphereGlyphs.cu)
+cuda_compile_and_embed(embedded_SuperGlyphs_programs device/SuperGlyphs.cu)
 
-add_executable(owlTubesViewer
+include_directories(${GLUT_INCLUDE_DIR})
+add_executable(owlGlyphsViewer
   ${embedded_common_programs}
-  ${embedded_InstanceTubes_programs}
-  viewer.cpp
+  ${embedded_ArrowGlyphs_programs}
+  ${embedded_MotionSpheres_programs}
+  ${embedded_SphereGlyphs_programs}
+  ${embedded_SuperGlyphs_programs}
   device/RayGenData.h
-  Tubes.h
-  Tubes.cpp
-  OptixTubes.h
-  OptixTubes.cpp
-  InstanceTubes.h
-  InstanceTubes.cpp
+  ArrowGlyphs.h
+  ArrowGlyphs.cpp
+  viewer.cpp
+  Glyphs.h
+  Glyphs.cpp
+  OptixGlyphs.h
+  OptixGlyphs.cpp
+  MotionSpheres.h
+  MotionSpheres.cpp
+  SphereGlyphs.h
+  SphereGlyphs.cpp
+  SuperGlyphs.h
+  SuperGlyphs.cpp
+  Triangles.h
+  Triangles.cpp
   )
-target_link_libraries(owlTubesViewer
-  ${OWL_LIBRARIES}
+
+target_link_libraries(owlGlyphsViewer
   ${OWL_VIEWER_LIBRARIES}
   )

@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "tubes/device/common.h"
+#include "glyphs/device/common.h"
 
-namespace tubes {
+namespace glyphs {
   namespace device {
     
     using namespace owl;
@@ -38,11 +38,14 @@ namespace tubes {
       int   accumID;
       /*! shading mode, in case we support different modes */
       int   shadeMode { 0 };
+      /*! path tracing path depth */
+      int   pathDepth { 0 };
       vec2i dbgPixel;
       /*! num samples per pixel */
       int   samplesPerPixel { 1 };
       bool  heatMapEnabled  { 0 };
       float heatMapScale    { 1.f };
+      DisneyMaterial material;
     };
 
   }
