@@ -43,11 +43,12 @@ if (USER_GEOM_SUPER_GLYPHS)
   add_definitions(-DUSER_GEOM_SUPER_GLYPHS=1)
 endif()
 
-set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/external/owl)
+set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/submodules/owl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${owl_dir}/owl/common/cmake/")
 add_subdirectory(${owl_dir} external_owl EXCLUDE_FROM_ALL)
 
 include(configure_cuda)
+include(configure_build_type)
 
 include_directories(${OWL_INCLUDES})
 include_directories(${OWL_VIEWER_INCLUDES})
