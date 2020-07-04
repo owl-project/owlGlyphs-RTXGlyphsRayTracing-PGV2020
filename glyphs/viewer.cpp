@@ -21,17 +21,6 @@
 #include "SphereGlyphs.h"
 #include "SuperGlyphs.h"
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cuda_gl_interop.h>
-// eventually to go into 'apps/'
-#define STB_IMAGE_WRITE_IMPLEMENTATION 1
-#include "samples/common/3rdParty/stb/stb_image_write.h"
-#define STB_IMAGE_IMPLEMENTATION 1
-#include "samples/common/3rdParty/stb/stb_image.h"
-
-#include <math.h>
-#include <cuda_runtime_api.h>
-#include <cuda_gl_interop.h>
 // std
 #include <queue>
 #include <map>
@@ -43,6 +32,8 @@
 #include <condition_variable>
 
 #include "samples/common/owlViewer/OWLViewer.h"
+#define STB_IMAGE_IMPLEMENTATION 1
+#include "samples/common/3rdParty/stb/stb_image.h"
 
 namespace glyphs {
 
@@ -140,19 +131,20 @@ namespace glyphs {
 
       std::cout << "parameters saved in '" << fileName << ".params" << "'" << std::endl;
 
-      std::vector<uint32_t> pixels;
+      // std::vector<uint32_t> pixels;
       
-      const uint32_t *fb 
-        = (const uint32_t *)fbPointer;
+      // const uint32_t *fb 
+      //   = (const uint32_t *)fbPointer;
       
-      for (int y=0;y<fbSize.y;y++) {
-        const uint32_t *line = fb + (fbSize.y-1-y)*fbSize.x;
-        for (int x=0;x<fbSize.x;x++) {
-          pixels.push_back(line[x] | (0xff << 24));
-        }
-      }
-      stbi_write_png(fileName.c_str(),fbSize.x,fbSize.y,4,
-                     pixels.data(),fbSize.x*sizeof(uint32_t));
+      // for (int y=0;y<fbSize.y;y++) {
+      //   const uint32_t *line = fb + (fbSize.y-1-y)*fbSize.x;
+      //   for (int x=0;x<fbSize.x;x++) {
+      //     pixels.push_back(line[x] | (0xff << 24));
+      //   }
+      // }
+      // stbi_write_png(fileName.c_str(),fbSize.x,fbSize.y,4,
+      //                pixels.data(),fbSize.x*sizeof(uint32_t));
+      inherited::screenShot(fileName);
       std::cout << "screenshot saved in '" << fileName << "'" << std::endl;
     }
     

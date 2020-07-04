@@ -50,9 +50,6 @@ add_subdirectory(${owl_dir} external_owl EXCLUDE_FROM_ALL)
 include(configure_cuda)
 include(configure_build_type)
 
-include_directories(${OWL_INCLUDES})
-include_directories(${OWL_VIEWER_INCLUDES})
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # -------------------------------------------------------
 if (NOT WIN32) 
@@ -63,5 +60,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # -------------------------------------------------------
+include_directories(${OWL_INCLUDES})
+include_directories(${OWL_VIEWER_INCLUDES})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+add_definitions(${OWL_CXX_FLAGS})
 add_subdirectory(glyphs)
 
