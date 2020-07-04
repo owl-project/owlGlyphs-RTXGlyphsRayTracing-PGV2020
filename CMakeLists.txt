@@ -31,9 +31,10 @@ endif()
 set(owl_dir ${CMAKE_CURRENT_SOURCE_DIR}/submodules/owl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${owl_dir}/owl/common/cmake/")
 
-include(configure_owl)
-include(configure_cuda)
-#include(configure_optix)
+add_subdirectory(${owl_dir} EXCLUDE_FROM_ALL)
+#include(configure_owl)
+#include(configure_cuda)
+include(configure_optix)
 #include(configure_build_type)
 
 # -------------------------------------------------------
