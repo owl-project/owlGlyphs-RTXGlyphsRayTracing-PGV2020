@@ -141,7 +141,6 @@ namespace tubes {
     owlRayGenSetBuffer(rayGen,"accumBuffer",accumBuffer);
     owlRayGenSet1i(rayGen,"deviceCount",owlGetDeviceCount(context));
       
-    owlBufferResize(colorBuffer,fbSize.x*fbSize.y);
     owlRayGenSetPointer(rayGen,"colorBuffer",colorBufferPointer);
     // owlRayGenSetBuffer(rayGen,"colorBuffer",colorBuffer);
     owlRayGenSet2i(rayGen,"fbSize",fbSize.x,fbSize.y);
@@ -152,14 +151,4 @@ namespace tubes {
     owlBufferUpload(frameStateBuffer,&fs);
   }
 
-  uint32_t *OWLTubes::mapColorBuffer()
-  {
-    if (!colorBuffer) return nullptr;
-    return (uint32_t*)owlBufferGetPointer(colorBuffer,0);
-  }
-
-  void OWLTubes::unmapColorBuffer()
-  {
-    assert(colorBuffer);
-  }
 }

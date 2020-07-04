@@ -18,17 +18,6 @@
 #include "OptixTubes.h"
 #include "InstanceTubes.h"
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cuda_gl_interop.h>
-// eventually to go into 'apps/'
-// #define STB_IMAGE_WRITE_IMPLEMENTATION 1
-// #include "samples/common/3rdParty/stb/stb_image_write.h"
-// #define STB_IMAGE_IMPLEMENTATION 1
-// #include "samples/common/3rdParty/stb/stb_image.h"
-
-#include <math.h>
-#include <cuda_runtime_api.h>
-#include <cuda_gl_interop.h>
 #include "samples/common/owlViewer/OWLViewer.h"
 // std
 #include <queue>
@@ -106,7 +95,7 @@ namespace tubes {
       this->fbSize = newSize;
       // ... tell parent to resize (also resizes the pbo in the window)
       inherited::resize(newSize);
-      
+
       renderer.resizeFrameBuffer(newSize,fbPointer);
       
       
@@ -123,7 +112,7 @@ namespace tubes {
     virtual void render() override
     {
       if (fbSize.x < 0) return;
-      
+
       static double t_last = -1;
       renderer.render();
       

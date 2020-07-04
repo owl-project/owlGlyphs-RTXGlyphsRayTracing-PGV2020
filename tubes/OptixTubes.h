@@ -38,9 +38,6 @@ namespace tubes {
                            void *colorBufferPointer);
     void updateFrameState(device::FrameState &fs);
 
-    uint32_t *mapColorBuffer();
-    void unmapColorBuffer();
-
     void render();
 
     /*! size of current frame buffer */
@@ -48,7 +45,6 @@ namespace tubes {
     OWLContext context = 0;
     OWLModule module = 0;
     OWLBuffer frameStateBuffer = 0;
-    OWLBuffer colorBuffer = 0;
     OWLBuffer accumBuffer = 0;
     OWLGroup  world = 0;
     OWLRayGen rayGen = 0;

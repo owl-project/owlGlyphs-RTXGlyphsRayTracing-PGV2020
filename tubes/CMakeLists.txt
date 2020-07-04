@@ -23,7 +23,6 @@ include_directories(${OWL_VIEWER_INCLUDES})
 cuda_compile_and_embed(embedded_common_programs device/common.cu)
 cuda_compile_and_embed(embedded_InstanceTubes_programs device/InstanceTubes.cu)
 
-message("OWL_INCLUDES ${OWL_INCLUDES}")
 add_executable(owlTubesViewer
   ${embedded_common_programs}
   ${embedded_InstanceTubes_programs}
